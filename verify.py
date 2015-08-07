@@ -4,12 +4,12 @@ import sys
 import re
 import string
 
-f = open('test', 'r+')
+REGEX_CASE_LINE_MATCH = '[ \t]*case[ \t][\d\w]*:'
 
-regex_var = '[ \t]*somethingelse[ =!]*[-][\d\w]'
-regex_var2 = '[ \t]*somethingelse[ =!]*[-][\d\w]'
 
-case_line = '[ \t]*case[ \t][\d\w]*:'
+def getRegexFor(varName):
+	return  '[ \t]*' + varName + '[ =!]*[-][\d\w]'
+
 
 def nextCharIsParentesis(line):
     for i in range(1, len(line)):
@@ -21,6 +21,7 @@ def nextCharIsParentesis(line):
             else :
                 break
     return -1
+
 
 def prevCharIsParentesis(line, pos):
     l = len(line[0:pos])
@@ -35,6 +36,7 @@ def prevCharIsParentesis(line, pos):
                 break
     return -1
 
+
 def getNextDataIdx(line):
     empty_list = [ " ", "\t", "\n", "&", "|"] 
     for i in range(1, len(line)) :
@@ -44,6 +46,7 @@ def getNextDataIdx(line):
             return i;
 
     return -1
+
 
 def isParenthesisEmpty(line, pos):
     pos = pos - 1
@@ -73,10 +76,12 @@ def isParenthesisEmpty(line, pos):
 
     return line
 
-def processFile():
-    for line in f:
-        m = re.search(regex_var, line)
-        line = re.sub(regex_var, '', line)
+
+def processFile(fileName, varToBeRemoved):
+	cfile = open(fileName, 'r+')
+    for line in cfile:
+        m = re.search(getRegexFor(varToBeRemoved), line)
+        line = re.sub(getRegexFor(varToBeRemoved), '', line)
 
         if m is not None:
             line = isParenthesisEmpty(line, m.start())
@@ -91,9 +96,9 @@ def removeCase(fileName, enumIdx) :
 		cData = cFile.readlines()
 
 	skipLine = False
-
+	fCase = 'case ' + enumIdx + ':'
 	for idx in range(len(cData)):
-		if cData[idx].find("case somethingelse:") != -1:
+		if cData[idx].find(fCase) != -1:
 			skipLine = True
 			continue
 
@@ -101,7 +106,7 @@ def removeCase(fileName, enumIdx) :
 			skipLine = False
 			continue
 
-		if re.search(case_line, cData[idx]) is not None :
+		if re.search(REGEX_CASE_LINE_MATCH, cData[idx]) is not None :
 			skipLine = False
 
 		if not skipLine:

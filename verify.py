@@ -5,7 +5,7 @@ import re
 import string
 
 REGEX_CASE_LINE_MATCH = '[ \t]*case[ \t][\d\w]*:'
-
+TEST_FILE = 'test-data/source.c'
 
 def getRegexFor(varName):
     return  '[ \t]*' + varName + '[ =!]*[-][\d\w]'
@@ -115,7 +115,7 @@ def removeCase(fileName, enumIdx) :
 
 
 """  !!! actual processing !!! """
-#processFile()
-removeCase('test', 'somethingelse')
+#processFile(TEST_FILE, 'somethingelse')
+#removeCase(TEST_FILE, 'somethingelse')
 
 print("")

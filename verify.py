@@ -8,7 +8,7 @@ REGEX_CASE_LINE_MATCH = '[ \t]*case[ \t][\d\w]*:'
 
 
 def getRegexFor(varName):
-	return  '[ \t]*' + varName + '[ =!]*[-][\d\w]'
+    return  '[ \t]*' + varName + '[ =!]*[-][\d\w]'
 
 
 def nextCharIsParentesis(line):
@@ -78,7 +78,7 @@ def isParenthesisEmpty(line, pos):
 
 
 def processFile(fileName, varToBeRemoved):
-	cfile = open(fileName, 'r+')
+    cfile = open(fileName, 'r+')
     for line in cfile:
         m = re.search(getRegexFor(varToBeRemoved), line)
         line = re.sub(getRegexFor(varToBeRemoved), '', line)
@@ -92,25 +92,25 @@ def processFile(fileName, varToBeRemoved):
 
 
 def removeCase(fileName, enumIdx) :
-	with open(fileName, "r") as cFile:
-		cData = cFile.readlines()
+    with open(fileName, "r") as cFile:
+        cData = cFile.readlines()
 
-	skipLine = False
-	fCase = 'case ' + enumIdx + ':'
-	for idx in range(len(cData)):
-		if cData[idx].find(fCase) != -1:
-			skipLine = True
-			continue
+    skipLine = False
+    fCase = 'case ' + enumIdx + ':'
+    for idx in range(len(cData)):
+        if cData[idx].find(fCase) != -1:
+            skipLine = True
+            continue
 
-		if cData[idx].find("break;") != -1 and skipLine == True:
-			skipLine = False
-			continue
+        if cData[idx].find("break;") != -1 and skipLine == True:
+            skipLine = False
+            continue
 
-		if re.search(REGEX_CASE_LINE_MATCH, cData[idx]) is not None :
-			skipLine = False
+        if re.search(REGEX_CASE_LINE_MATCH, cData[idx]) is not None :
+            skipLine = False
 
-		if not skipLine:
-			print(cData[idx].rstrip())
+        if not skipLine:
+            print(cData[idx].rstrip())
 
 
 

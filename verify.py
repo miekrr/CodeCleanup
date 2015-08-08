@@ -9,6 +9,8 @@ f = open('test', 'r+')
 regex_var = '[ \t]*somethingelse[ =!]*[-][\d\w]'
 regex_var2 = '[ \t]*somethingelse[ =!]*[-][\d\w]'
 
+case_line = '[ \t]*case[ \t][\d\w]*:'
+
 def nextCharIsParentesis(line):
     for i in range(1, len(line)):
         if line[i] == " " :
@@ -84,7 +86,31 @@ def processFile():
         print(line, end="")
 
 
+def removeCase(fileName, enumIdx) :
+	with open(fileName, "r") as cFile:
+		cData = cFile.readlines()
+
+	skipLine = False
+
+	for idx in range(len(cData)):
+		if cData[idx].find("case somethingelse:") != -1:
+			skipLine = True
+			continue
+
+		if cData[idx].find("break;") != -1 and skipLine == True:
+			skipLine = False
+			continue
+
+		if re.search(case_line, cData[idx]) is not None :
+			skipLine = False
+
+		if not skipLine:
+			print(cData[idx].rstrip())
+
+
+
 """  !!! actual processing !!! """
 #processFile()
+removeCase('test', 'somethingelse')
 
 print("")

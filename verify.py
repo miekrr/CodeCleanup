@@ -4,38 +4,48 @@ import sys
 import re
 import string
 
+REGEX_CASE_LINE_MATCH = '[ \t]*case[ \t][\d\w]*:'
 
 def isNumeric(char) :
     return char.isnumeric()
 
 
-def is_next_char_word(line, idx):   
-    if line[idx].isalpha() or line[idx] == "_" or isNumeric(line[idx]) :
-        return True
+def is_next_char_word(line, idx):
+    if len(line) > idx:   
+        if line[idx].isalpha() or line[idx] in "_.->" or isNumeric(line[idx]) :
+            return True
     return False
 
 
 def is_next_char_whitespace(line, idx):
-    if len(line) < idx :
-        if line[idx] == "_" or line[idx] == "\t":
+    if len(line) > idx :
+        if line[idx] in "_\t " :
             return True
     return False
 
+
 def variable_matched(line, varToBeRemoved):
     if varToBeRemoved in line:
+
         idx = line.index(varToBeRemoved)
         end_idx = idx + len(varToBeRemoved)
+
         if idx == -1:
             return False, None, None
         else :
-            return True, idx, end_idx
+            if is_next_char_word(line, end_idx) :
+                return False, None, None
+            else :
+                return True, idx, end_idx
     else :
         return False, None, None
 
 
-def is_variable_in_paranthesis(line, end_var) :
+def is_variable_in_paranthesis(line, end_var, varToBeRemoved) :
     remove_statement = False
     start_statement = None
+    if varToBeRemoved == "ERS4500_48GT_PWR":
+        pass
     while is_next_char_whitespace(line, end_var):
         end_var = end_var + 1
     if len(line) <= end_var :
@@ -50,6 +60,9 @@ def is_variable_in_paranthesis(line, end_var) :
         current_idx = end_var - 1
         while balance != 0 :
             current_idx = current_idx - 1
+            if current_idx < 0 :
+                balance = 0
+                continue
             if line[current_idx] == ")" :
                 balance = balance + 1;
             if line[current_idx] == "(" :
@@ -106,10 +119,15 @@ def processFile(cData, varToBeRemoved):
     changed_file = []
 
     for line in cData:
+        line_was_empty = line.strip() == ""
+        line_is_empty = False
         skipline = False
         var_matched, start_var, end_var = variable_matched(line, varToBeRemoved)
+
         if var_matched == True :
-            recalculate_start_end, start, end = is_variable_in_paranthesis(line, end_var)    
+            if varToBeRemoved == "BS_Hornet" :
+                pass
+            recalculate_start_end, start, end = is_variable_in_paranthesis(line, end_var, varToBeRemoved)    
 
             if recalculate_start_end == True :
                 start_statement = start
@@ -125,16 +143,24 @@ def processFile(cData, varToBeRemoved):
                 tmp_line = line[start_statement-1:].strip()
                 if "&&" == tmp_line or "||" == tmp_line :
                     line = line[:start_statement-1]
-            line.rstrip()
+            line = line.rstrip()
+            line_is_empty = line.strip() == ""
 
-        if skipline == False :
-            changed_file.append(line.rstrip("\n"))
+        if skipline == False:
+            if line_is_empty == True :
+                if line_was_empty == True :
+                    changed_file.append(line.rstrip("\n"))
+            else :
+                changed_file.append(line.rstrip("\n"))
+
+                    
     return changed_file
 
 
 def removeCase(cData, enumIdx) :
     skipLine = False
     fCase = 'case ' + enumIdx + ':'
+
     changed_file = []
     for idx in range(len(cData)):
         if cData[idx].find(fCase) != -1:
